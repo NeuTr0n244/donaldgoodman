@@ -1,0 +1,6 @@
+*.glb
+My project/
+node_modules/
+.env*
+firebase-config.js
+profile.js

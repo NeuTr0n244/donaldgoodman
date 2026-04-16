@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Donald Goodman</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<canvas id="scene3d"></canvas>
+
+<!-- PROFILE BUTTON (top right) -->
+<div class="prof-btn" id="profBtn" onclick="document.getElementById('profModal').classList.add('vis')">
+    <div class="prof-avatar" id="profAvatar"><span id="profInitial">?</span></div>
+    <span class="prof-name" id="profName">Set profile</span>
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+</div>
+
+<!-- PROFILE MODAL -->
+<div class="prof-overlay" id="profModal">
+    <div class="prof-card">
+        <button class="prof-close" onclick="document.getElementById('profModal').classList.remove('vis')">&times;</button>
+        <h3 class="prof-title">Edit Profile</h3>
+        <div class="prof-upload" onclick="document.getElementById('profFile').click()">
+            <div class="prof-big-avatar" id="profBigAvatar"><span id="profBigInitial">?</span></div>
+            <span class="prof-upload-label">Upload photo</span>
+            <input type="file" id="profFile" accept="image/*" style="display:none">
+        </div>
+        <div class="prof-field"><label>Name</label><input type="text" id="profNameInput" placeholder="Your name" maxlength="20"></div>
+        <div class="prof-field"><label>Solana Wallet</label><input type="text" id="profWallet" placeholder="Your SOL address for rewards" maxlength="50"></div>
+        <button class="prof-save" id="profSave">Save Profile</button>
+    </div>
+</div>
+
+<!-- RANKING BUTTON (top center) -->
+<button class="rank-btn" id="rankBtn" onclick="document.getElementById('rankPanel').classList.add('vis')">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9H4.5a2.5 2.5 0 010-5H6"/><path d="M18 9h1.5a2.5 2.5 0 000-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0012 0V2Z"/></svg>
+    <span>RANKING</span>
+</button>
+
+<!-- RANKING PANEL -->
+<div class="rank-overlay" id="rankPanel">
+    <div class="rank-card">
+        <button class="rank-close" onclick="document.getElementById('rankPanel').classList.remove('vis')">&times;</button>
+        <div class="rank-header">
+            <h2 class="rank-title">TOP 10</h2>
+            <p class="rank-sub">Best players this season</p>
+        </div>
+        <div class="rank-table">
+            <div class="rank-thead"><span class="rt-pos">#</span><span class="rt-name">Player</span><span class="rt-pts">Points</span><span class="rt-wallet">Wallet</span></div>
+            <div class="rank-tbody" id="rankBody"></div>
+        </div>
+    </div>
+</div>
+
+<!-- START SCREEN -->
+<div class="overlay active" id="startScreen">
+    <div class="start-layout">
+        <div class="start-left">
+            <div class="relief-logo">
+                <div class="relief-line"><span class="rl-green" id="rl1">DONALD</span><span class="rl-shadow" id="rl1r">DONALD</span></div>
+                <div class="relief-line"><span class="rl-white" id="rl2">GOODMAN</span><span class="rl-shadow" id="rl2r">GOODMAN</span></div>
+            </div>
+            <div class="start-form">
+                <div class="sf-row"><span class="sf-num">1</span><input class="sf-input" id="nameInput" type="text" placeholder="Your name here" maxlength="20" autocomplete="off"></div>
+                <div class="sf-row"><span class="sf-num">2</span><div class="sf-diff"><span class="sf-label">Level:</span><button class="sf-btn" data-level="easy">Easy</button><button class="sf-btn sel" data-level="medium">Medium</button><button class="sf-btn" data-level="hard">Hard</button></div></div>
+                <div class="sf-play" id="startBtn"><span class="sf-play-arrow">&#9654;</span><span class="sf-play-text" id="playText">Loading...</span></div>
+                <div class="sf-bar"><div class="sf-bar-fill" id="loadBar"></div></div>
+                <div class="sf-status" id="loadStatus">Loading 3D scene... <span id="loadPct">0%</span></div>
+            </div>
+        </div>
+        <img id="presenterImg" src="./apresentador.png" alt="" class="start-presenter">
+    </div>
+</div>
+
+<!-- GAME SCREEN -->
+<div class="overlay" id="gameScreen">
+    <div class="g-top" id="gTop">
+        <div class="g-pill"><span class="g-logo">Donald Goodman</span><span class="g-live">LIVE</span></div>
+        <div class="g-dots" id="gDots"></div>
+        <div class="g-pill"><span class="g-slabel">SCORE</span><span class="g-sval" id="gScore">0</span></div>
+    </div>
+    <div class="g-question" id="gQuestion">
+        <div class="gq-head"><span class="gq-cat" id="gCat">VOCABULARY</span><span class="gq-num" id="gNum">1/10</span><div class="gq-timer"><svg viewBox="0 0 40 40"><circle cx="20" cy="20" r="17" class="gq-tbg"/><circle cx="20" cy="20" r="17" class="gq-tfg" id="gTimerRing"/></svg><span class="gq-tnum" id="gTimerNum">30</span></div></div>
+        <p class="gq-text" id="gText">Loading...</p>
+    </div>
+    <div class="g-opts" id="gOpts">
+        <button class="g-opt" data-i="0"><span class="go-num">1</span><span class="go-txt"></span></button>
+        <button class="g-opt" data-i="1"><span class="go-num">2</span><span class="go-txt"></span></button>
+        <button class="g-opt" data-i="2"><span class="go-num">3</span><span class="go-txt"></span></button>
+        <button class="g-opt" data-i="3"><span class="go-num">4</span><span class="go-txt"></span></button>
+    </div>
+    <div class="g-foot"><span>&#9889; <strong id="gStreak">0</strong></span><span>Level: <strong id="gLevel">MEDIUM</strong></span></div>
+    <div class="g-bubble" id="gBubble"><p id="gBubbleText"></p></div>
+    <div class="g-cross" id="gCross"><div class="gc-dot"></div><div class="gc-ring"></div></div>
+    <div class="g-big-timer" id="gBigTimer"><span class="gbt-num" id="gBigNum">30</span><span class="gbt-label">ANSWER</span></div>
+    <div class="g-esc">ESC menu</div>
+</div>
+
+<!-- PAUSE MENU -->
+<div class="pause" id="pauseMenu">
+    <div class="pause-bg"></div>
+    <div class="pause-box">
+        <h2>PAUSED</h2>
+        <button class="p-btn green" id="pResume">RESUME</button>
+        <button class="p-btn" id="pRestart">RESTART</button>
+        <button class="p-btn" id="pMute">MUTE</button>
+        <button class="p-btn red" id="pQuit">QUIT</button>
+    </div>
+</div>
+
+<!-- RESULTS SCREEN -->
+<div class="overlay" id="resultsScreen">
+    <div class="r-box">
+        <h1 class="r-title">SHOW OVER!</h1>
+        <span class="r-score" id="rScore">0</span>
+        <span class="r-label">POINTS</span>
+        <div class="r-stats">
+            <div><strong id="rCorrect">0</strong><span>Correct</span></div>
+            <div><strong id="rWrong">0</strong><span>Wrong</span></div>
+            <div><strong id="rStreak">0</strong><span>Streak</span></div>
+        </div>
+        <div class="r-grade" id="rGrade">A+</div>
+        <button class="r-play" id="rAgain">PLAY AGAIN</button>
+    </div>
+</div>
+
+<!-- Firebase (async - won't block 3D) -->
+<script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+<script defer src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+<script defer>
+window.addEventListener('load',function(){
+    try{
+        firebase.initializeApp({
+            apiKey:"AIzaSyDNLh7QM9HOIuWgiiOMJoS1kPQ9pd9nTP4",
+            authDomain:"goodman-a13e6.firebaseapp.com",
+            projectId:"goodman-a13e6",
+            storageBucket:"goodman-a13e6.firebasestorage.app",
+            messagingSenderId:"614268347740",
+            appId:"1:614268347740:web:965632167b3e2da0bb4d99"
+        });
+        window.db=firebase.firestore();
+        console.log('Firebase connected');
+        if(typeof renderRanking==='function')renderRanking();
+    }catch(e){console.warn('Firebase:',e)}
+});
+</script>
+
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.160.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
