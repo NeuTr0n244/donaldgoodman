@@ -51,7 +51,7 @@ intro:["Welcome to The Donald Goodman Show! The sharpest English speakers go hea
 // ============================================
 // STATE
 // ============================================
-var G = {diff:'medium',qi:0,score:0,streak:0,best:0,ok:0,bad:0,sel:-1,busy:false,muted:false,timeLeft:30,maxTime:30,iv:null,sid:0,paused:false,audioCtx:null};
+var G = {diff:'hard',qi:0,score:0,streak:0,best:0,ok:0,bad:0,sel:-1,busy:false,muted:false,timeLeft:30,maxTime:30,iv:null,sid:0,paused:false,audioCtx:null};
 var scene,renderer,clock,mixer,activeCamera;
 var glbCams={},btnObjs=[null,null,null,null],animActions=[];
 var headLook={on:false,tx:0,ty:0,cx:0,cy:0,base:new THREE.Quaternion(),maxY:1.0,maxP:0.75};
@@ -210,8 +210,7 @@ function hideHUD(){['gTop','gQuestion','gOpts'].forEach(function(id){var e=el(id
 function speak(text,dur){
     var b=el('gBubble'),bt=el('gBubbleText');if(bt)bt.textContent=text;if(b)b.classList.add('vis');
     speakId++;var myId=speakId;
-    if(currentAudio){try{currentAudio.pause();currentAudio.src=''}catch(e){}currentAudio=null}
-    audioAnalyser=null;if('speechSynthesis' in window)speechSynthesis.cancel();
+    audioAnalyser=null;
     var d=dur||Math.max(2000,text.length*60);
     setTimeout(function(){if(b)b.classList.remove('vis')},d+1000);
     if(G.muted)return;
@@ -296,8 +295,8 @@ function showQ(){
     if(G.qi>=G.questions.length){endGame();return}
     G.sel=-1;G.busy=false;
     var q=G.questions[G.qi];
-    // Aim at buttons
-    switchCam('Camera');aimButtons();headLook.on=true;
+    // Keep camera where it is (no reset between questions)
+    headLook.on=true;
     // Update UI
     el('gCat').textContent=q.cat;el('gNum').textContent=(G.qi+1)+'/10';el('gText').textContent=q.q;
     el('gDots').children[G.qi].classList.add('now');
@@ -485,26 +484,20 @@ function renderRanking(){
     }
 }
 function renderLocal(body){
-    var saved=JSON.parse(localStorage.getItem('dg_ranks')||'[]');
-    // Fill with mock if less than 10
-    var mock=[
-        {name:'CryptoKing',pts:2340,w:'7xKXt...9mPq'},{name:'EnglishPro',pts:2180,w:'3bNr2...fW8x'},
-        {name:'SolanaWhale',pts:1950,w:'Dk8pL...zR4v'},{name:'WordMaster',pts:1820,w:'9cYm7...hJ2n'},
-        {name:'QuizLord',pts:1640,w:'Fp3xK...bN6w'},{name:'GrammarBoss',pts:1500,w:'2mRv8...tQ9s'},
-        {name:'VocabHero',pts:1380,w:'Hn4wL...kP5e'},{name:'LangNinja',pts:1200,w:'8jTx3...mW7c'},
-        {name:'BrainStorm',pts:980,w:'Qr6nB...fV2y'},{name:'NewPlayer',pts:750,w:'5pLm9...xK4d'}
-    ];
-    saved.forEach(function(s){mock.push(s)});
-    mock.sort(function(a,b){return b.pts-a.pts});
-    renderRows(body,mock.slice(0,10));
+    renderRows(body,[]);
 }
 function renderRows(body,rows){
     var html='';
-    rows.forEach(function(r,i){
-        var pts=(r.pts||0).toLocaleString('en-US');
-        var w=r.w||'---';if(w.length>12)w=w.substr(0,6)+'...'+w.substr(-4);
-        html+='<div class="rank-row"><span class="rt-pos">'+(i+1)+'</span><span class="rt-name">'+(r.name||'Anonymous')+'</span><span class="rt-pts">'+pts+' pts</span><span class="rt-wallet">'+w+'</span></div>';
-    });
+    for(var i=0;i<10;i++){
+        var r=rows[i];
+        if(r){
+            var pts=(r.pts||0).toLocaleString('en-US');
+            var w=r.w||'---';if(w.length>12)w=w.substr(0,6)+'...'+w.substr(-4);
+            html+='<div class="rank-row"><span class="rt-pos">'+(i+1)+'</span><span class="rt-name">'+(r.name||'Anonymous')+'</span><span class="rt-pts">'+pts+' pts</span><span class="rt-wallet">'+w+'</span></div>';
+        }else{
+            html+='<div class="rank-row" style="opacity:.3"><span class="rt-pos">'+(i+1)+'</span><span class="rt-name" style="font-style:italic;color:rgba(255,255,255,.25)">Waiting for player...</span><span class="rt-pts" style="color:rgba(255,255,255,.15)">---</span><span class="rt-wallet">---</span></div>';
+        }
+    }
     body.innerHTML=html;
 }
 

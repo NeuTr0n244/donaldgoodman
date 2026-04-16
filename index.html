@@ -11,11 +11,15 @@
 
 <canvas id="scene3d"></canvas>
 
-<!-- PROFILE BUTTON (top right) -->
+<!-- TOP RIGHT: Profile + Twitter + CA -->
+<div class="top-right-bar">
+<a class="tr-link" href="https://x.com" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+<span class="tr-ca">CA: SOON</span>
 <div class="prof-btn" id="profBtn" onclick="document.getElementById('profModal').classList.add('vis')">
     <div class="prof-avatar" id="profAvatar"><span id="profInitial">?</span></div>
     <span class="prof-name" id="profName">Set profile</span>
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+</div>
 </div>
 
 <!-- PROFILE MODAL -->
@@ -65,7 +69,7 @@
             </div>
             <div class="start-form">
                 <div class="sf-row"><span class="sf-num">1</span><input class="sf-input" id="nameInput" type="text" placeholder="Your name here" maxlength="20" autocomplete="off"></div>
-                <div class="sf-row"><span class="sf-num">2</span><div class="sf-diff"><span class="sf-label">Level:</span><button class="sf-btn" data-level="easy">Easy</button><button class="sf-btn sel" data-level="medium">Medium</button><button class="sf-btn" data-level="hard">Hard</button></div></div>
+                <div class="sf-row"><span class="sf-num">2</span><div class="sf-diff"><span class="sf-label">Level:</span><button class="sf-btn" data-level="easy" disabled style="opacity:.3;cursor:not-allowed">Easy</button><button class="sf-btn" data-level="medium" disabled style="opacity:.3;cursor:not-allowed">Medium</button><button class="sf-btn sel" data-level="hard">Hard</button></div></div>
                 <div class="sf-play" id="startBtn"><span class="sf-play-arrow">&#9654;</span><span class="sf-play-text" id="playText">Loading...</span></div>
                 <div class="sf-bar"><div class="sf-bar-fill" id="loadBar"></div></div>
                 <div class="sf-status" id="loadStatus">Loading 3D scene... <span id="loadPct">0%</span></div>
