@@ -550,8 +550,45 @@ function initProfile(){
     el('profSave').addEventListener('click',saveProf);
 }
 
+// ============================================
+// REWARD TIMER (controlled via Firestore)
+// ============================================
+// In Firebase Console > Firestore > collection "config" > document "reward"
+// Set field: nextReward (timestamp) to when the next reward happens
+// Example: click "Add document", id: "reward", field: "nextReward", type: timestamp
+function initRewardTimer(){
+    if(!window.db)return;
+    // Listen in real-time for changes
+    window.db.collection('config').doc('reward').onSnapshot(function(doc){
+        if(!doc.exists){
+            // Create default: 10 min from now
+            var def=new Date(Date.now()+600000);
+            window.db.collection('config').doc('reward').set({nextReward:firebase.firestore.Timestamp.fromDate(def)});
+            return;
+        }
+        var data=doc.data();
+        if(!data.nextReward)return;
+        var target=data.nextReward.toDate().getTime();
+        // Clear old interval
+        if(window._rewardIv)clearInterval(window._rewardIv);
+        window._rewardIv=setInterval(function(){
+            var now=Date.now(),diff=target-now;
+            var te=el('rktTime');if(!te)return;
+            if(diff<=0){
+                te.textContent='REWARDING!';te.className='rkt-time done';
+            }else{
+                var m=Math.floor(diff/60000),s=Math.floor((diff%60000)/1000);
+                te.textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+                te.className=diff<60000?'rkt-time urgent':'rkt-time';
+            }
+        },1000);
+    },function(e){console.warn('Timer listen fail:',e)});
+}
+
 function init(){
     initScene();initRelief();renderRanking();initProfile();
+    // Start reward timer after Firebase loads
+    addEventListener('load',function(){setTimeout(initRewardTimer,2000)});
     if('speechSynthesis' in window){speechSynthesis.getVoices();speechSynthesis.onvoiceschanged=function(){speechSynthesis.getVoices()}}
 
     // Difficulty
