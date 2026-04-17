@@ -45,7 +45,7 @@ ok:["Brilliant! Correct!","You nailed it!","Absolutely right!","Perfect!","You'r
 no:["Not quite!","That's not right!","Oh no!","Incorrect!","Not this time!","Wrong!"],
 timeout:["Time's up!","Too slow!","Let's move on!"],
 suspense:["Hmm, let me check...","Is that the answer? We shall see...","That's locked in. Moment of truth...","Final answer? Let's see...","Tension! Let's reveal...","Let me check carefully..."],
-intro:["Welcome to The Donald Goodman Show! The sharpest English speakers go head to head, and the winner walks away with Solana rewards. Are you ready?"]
+intro:["Welcome to The Jack Morrison Show! The sharpest English speakers go head to head, and the winner walks away with Solana rewards. Are you ready?"]
 };
 
 // ============================================
