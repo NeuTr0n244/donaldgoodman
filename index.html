@@ -55,6 +55,14 @@ body { background: var(--dark); color: var(--text); font-family: 'Space Grotesk'
   border-radius: 100px; cursor: pointer; transition: all .2s;
 }
 .nav-prof:hover { border-color: var(--green); background: rgba(34,220,80,.08) }
+.nav-right { display: flex; align-items: center; gap: 10px }
+.nav-x {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 38px; height: 38px; border-radius: 50%;
+  background: rgba(255,255,255,.04); border: .5px solid rgba(255,255,255,.12);
+  color: rgba(255,255,255,.7); text-decoration: none; transition: all .2s;
+}
+.nav-x:hover { color: #fff; border-color: rgba(255,255,255,.3); background: rgba(255,255,255,.08); transform: translateY(-1px) }
 .np-avatar {
   width: 28px; height: 28px; border-radius: 50%;
   border: 1.5px solid rgba(34,220,80,.5); background: rgba(34,220,80,.1);
@@ -389,10 +397,15 @@ footer {
     <a href="#s3">Cast</a>
     <a href="#ranking">Ranking</a>
   </div>
-  <div class="nav-prof" id="navProf" onclick="document.getElementById('profModal').classList.add('vis')">
-    <div class="np-avatar" id="npAvatar"><span id="npInitial">?</span></div>
-    <span class="np-name" id="npName">Profile</span>
-    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+  <div class="nav-right">
+    <a class="nav-x" href="https://x.com/MorrisonShow" target="_blank" rel="noopener" aria-label="X (Twitter)">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+    </a>
+    <div class="nav-prof" id="navProf" onclick="document.getElementById('profModal').classList.add('vis')">
+      <div class="np-avatar" id="npAvatar"><span id="npInitial">?</span></div>
+      <span class="np-name" id="npName">Profile</span>
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 3a2.83 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+    </div>
   </div>
 </nav>
 
