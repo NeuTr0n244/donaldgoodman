@@ -128,10 +128,19 @@ function loadGLB(){
             glbCams[d.n]=cam;
         });
 
-        // Buttons
+        // Buttons + add light to each
+        var btnColors=[0x22c55e,0x3b82f6,0xeab308,0xef4444];
         gltf.scene.traverse(function(o){
             var m=(o.name||'').match(/^Button_?([1-4])$/i);
-            if(m)btnObjs[parseInt(m[1])-1]=o;
+            if(m){
+                var idx=parseInt(m[1])-1;
+                btnObjs[idx]=o;
+                // Add colored point light above each button
+                var wp=new THREE.Vector3();o.getWorldPosition(wp);
+                var light=new THREE.PointLight(btnColors[idx],3,3,2);
+                light.position.set(wp.x,wp.y+0.5,wp.z);
+                scene.add(light);
+            }
         });
 
         // Animations
@@ -154,12 +163,12 @@ function loadGLB(){
         // Jaw bone
         gltf.scene.traverse(function(o){if(!jawBone&&o.isBone&&/jaw/i.test(o.name))jawBone=o});
 
-        // Hide presenter on start screen
+        // Find presenter (closest to scene center) — keep visible always
         var closest=null,cd=Infinity;
         gltf.scene.traverse(function(o){if(!o.isSkinnedMesh)return;var r=o;while(r.parent&&r.parent!==gltf.scene)r=r.parent;var w=new THREE.Vector3();r.getWorldPosition(w);var d=w.distanceTo(sc);if(d<cd){cd=d;closest=r}});
-        if(closest){presenterRoot=closest;presenterRoot.visible=false}
+        if(closest){presenterRoot=closest;presenterRoot.visible=true}
 
-        switchCam('Camera.002');
+        switchCam('Camera');
         el('loadBar').style.width='100%';el('loadPct').textContent='100%';
         el('loadStatus').textContent='Ready! Enter your name to play';
         el('startBtn').classList.add('ready');el('playText').textContent='Play Now';
@@ -279,7 +288,6 @@ function startGame(){
     // Crosshair + pointer lock
     document.body.classList.add('game-active');
     el('gCross').classList.add('on');
-    var cv=el('scene3d');try{cv.requestPointerLock()}catch(e){}
     headLook.on=true;
     setTimeout(function(){
         show('gameScreen');hideHUD();
@@ -444,9 +452,8 @@ function closePause(){
 }
 function quitGame(){
     el('pauseMenu').classList.remove('vis');killAll();exitGame();
-    if(presenterRoot)presenterRoot.visible=false;
-    hide('gameScreen');hide('resultsScreen');switchCam('Camera.002');
-    setTimeout(function(){show('startScreen');if(G.audioCtx)try{G.audioCtx.resume()}catch(e){}},600);
+    // Redirect back to landing page
+    location.href='landing.html';
 }
 
 // ============================================
@@ -520,14 +527,18 @@ function saveProf(){
 }
 function updateProfUI(p){
     var init=p.name?p.name[0].toUpperCase():'?';
-    el('profInitial').textContent=init;el('profBigInitial').textContent=init;
     el('profName').textContent=p.name||'Set profile';
     el('profNameInput').value=p.name||'';
     el('profWallet').value=p.wallet||'';
+    var av=el('profAvatar'),big=el('profBigAvatar');
     if(p.photo){
-        el('profAvatar').innerHTML='<img src="'+p.photo+'">';
-        el('profBigAvatar').innerHTML='<img src="'+p.photo+'">';
+        av.innerHTML='<img src="'+p.photo+'">';
+        big.innerHTML='<img src="'+p.photo+'">';
+    }else{
+        av.innerHTML='<span id="profInitial">'+init+'</span>';
+        big.innerHTML='<span id="profBigInitial">'+init+'</span>';
     }
+    var rm=el('profRemovePhoto');if(rm)rm.style.display=p.photo?'inline-flex':'none';
 }
 function initProfile(){
     var p=loadProfile();updateProfUI(p);
@@ -542,10 +553,16 @@ function initProfile(){
                 ctx.drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,128,128);
                 var url=c.toDataURL('image/jpeg',.7);
                 var p=loadProfile();p.photo=url;localStorage.setItem('dg_prof',JSON.stringify(p));
-                el('profAvatar').innerHTML='<img src="'+url+'">';
-                el('profBigAvatar').innerHTML='<img src="'+url+'">';
+                updateProfUI(p);
             };img.src=ev.target.result;
         };r.readAsDataURL(f);
+    });
+    var rm=el('profRemovePhoto');
+    if(rm)rm.addEventListener('click',function(ev){
+        ev.stopPropagation();
+        var p=loadProfile();delete p.photo;
+        localStorage.setItem('dg_prof',JSON.stringify(p));
+        updateProfUI(p);
     });
     el('profSave').addEventListener('click',saveProf);
 }
@@ -607,25 +624,33 @@ function init(){
     });
     el('nameInput').addEventListener('keydown',function(e){if(e.key==='Enter')el('startBtn').click()});
 
-    // Options click (via crosshair)
+    // Options click (via crosshair) — no pointer lock needed
     addEventListener('click',function(){
         if(!el('gCross').classList.contains('on')||G.busy)return;
         pointer.set(0,0);raycaster.setFromCamera(pointer,activeCamera);
         for(var i=0;i<4;i++){if(btnObjs[i]&&raycaster.intersectObject(btnObjs[i],true).length>0){selectOpt(i);return}}
     });
 
-    // Mouse head look
+    // Mouse head look — works with or without pointer lock
     addEventListener('mousemove',function(e){
         if(!headLook.on)return;
         if(document.pointerLockElement){
             headLook.tx=Math.max(-headLook.maxY,Math.min(headLook.maxY,headLook.tx-e.movementX*.0025));
             headLook.ty=Math.max(-headLook.maxP,Math.min(headLook.maxP,headLook.ty-e.movementY*.0025));
+        }else{
+            // Without pointer lock, map mouse position to head rotation
+            var nx=(e.clientX/innerWidth-.5)*2;  // -1..1
+            var ny=(e.clientY/innerHeight-.5)*2; // -1..1
+            headLook.tx=-nx*headLook.maxY;
+            headLook.ty=-ny*headLook.maxP;
         }
     });
 
-    // ESC
+    // ESC - only auto-pause on pointer lock change if it was previously locked
     document.addEventListener('pointerlockchange',function(){
-        if(!document.pointerLockElement&&document.body.classList.contains('game-active')&&!G.paused)openPause();
+        if(document.pointerLockElement){window._wasLocked=true;return}
+        if(!window._wasLocked)return; // never was locked, ignore
+        if(document.body.classList.contains('game-active')&&!G.paused)openPause();
     });
     document.addEventListener('keydown',function(e){
         if(e.key!=='Escape')return;
@@ -639,11 +664,92 @@ function init(){
     el('pMute').addEventListener('click',function(){G.muted=!G.muted;this.textContent=G.muted?'UNMUTE':'MUTE';if(G.muted&&currentAudio)try{currentAudio.pause()}catch(e){}});
     el('pQuit').addEventListener('click',function(){lastQuit=Date.now();quitGame()});
 
-    // Play again
+    // Play again - go back to landing
     el('rAgain').addEventListener('click',function(){
-        hide('resultsScreen');if(presenterRoot)presenterRoot.visible=false;
-        switchCam('Camera.002');setTimeout(function(){show('startScreen')},600);
+        location.href='landing.html';
     });
 }
 
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
+
+// Auto-start when coming from landing page
+var _autoStarted=false;
+function tryAutoStart(){
+    if(_autoStarted)return;
+    var params=new URLSearchParams(location.search);
+    if(params.get('autostart')!=='1')return;
+    _autoStarted=true;
+    var ss=el('startScreen');if(ss)ss.style.display='none';
+    var prof=loadProfile();var n=prof.name||'Player';
+    var ni=el('nameInput');if(ni)ni.value=n;
+
+    // Full-screen game-style loading overlay
+    var ld=document.createElement('div');
+    ld.id='autoLoad';
+    ld.innerHTML='<div class="al-inner">'+
+        '<div class="al-logo"><span class="al-g">JACK</span><span class="al-w">MORRISON</span></div>'+
+        '<div class="al-spinner"><div class="al-ring"></div><div class="al-dot"></div></div>'+
+        '<div class="al-status" id="autoStatus">Loading 3D studio</div>'+
+        '<div class="al-bar"><div class="al-bar-fill"></div></div>'+
+        '<div class="al-tip" id="autoTip">Tip: Get streaks for bonus points!</div>'+
+    '</div>';
+    document.body.appendChild(ld);
+
+    // Inject styles + hide HUD while loading
+    var st=document.createElement('style');
+    st.id='autoLoadStyle';
+    st.textContent=
+        '.top-right-bar,.rank-btn{display:none!important}'+
+        '#autoLoad{position:fixed;inset:0;z-index:9999;background:radial-gradient(ellipse at center,#0a1a0f 0%,#000 70%);display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;color:#fff;animation:alIn .4s ease}'+
+        '@keyframes alIn{from{opacity:0}to{opacity:1}}'+
+        '@keyframes alOut{to{opacity:0}}'+
+        '#autoLoad.out{animation:alOut .5s ease forwards}'+
+        '.al-inner{display:flex;flex-direction:column;align-items:center;gap:32px;width:min(480px,85vw)}'+
+        '.al-logo{font-family:Anton,sans-serif;font-size:68px;line-height:.85;letter-spacing:2px;display:flex;flex-direction:column;align-items:center;gap:2px}'+
+        '.al-g{color:#4ade80;text-shadow:0 0 28px rgba(74,222,128,.55)}'+
+        '.al-w{color:#fff}'+
+        '.al-spinner{position:relative;width:56px;height:56px}'+
+        '.al-ring{position:absolute;inset:0;border:2px solid rgba(74,222,128,.15);border-top-color:#4ade80;border-radius:50%;animation:alSpin 1s linear infinite;box-shadow:0 0 22px rgba(74,222,128,.4)}'+
+        '.al-dot{position:absolute;inset:0;margin:auto;width:6px;height:6px;background:#4ade80;border-radius:50%;box-shadow:0 0 12px #4ade80;animation:alPulse 1.2s ease-in-out infinite}'+
+        '@keyframes alSpin{to{transform:rotate(360deg)}}'+
+        '@keyframes alPulse{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}'+
+        '.al-status{font-size:13px;letter-spacing:4px;color:rgba(255,255,255,.7);text-transform:uppercase;font-weight:500}'+
+        '.al-status::after{content:"";display:inline-block;width:24px;text-align:left;animation:alDots 1.4s steps(4,end) infinite}'+
+        '@keyframes alDots{0%{content:""}25%{content:"."}50%{content:".."}75%{content:"..."}}'+
+        '.al-bar{width:100%;height:2px;background:rgba(255,255,255,.06);border-radius:2px;overflow:hidden;position:relative}'+
+        '.al-bar-fill{position:absolute;inset:0;width:30%;background:linear-gradient(90deg,transparent,#4ade80,transparent);box-shadow:0 0 10px rgba(74,222,128,.6);animation:alSlide 1.6s ease-in-out infinite}'+
+        '@keyframes alSlide{0%{left:-30%}100%{left:100%}}'+
+        '.al-tip{font-size:11px;letter-spacing:2px;color:rgba(255,255,255,.35);text-align:center;text-transform:uppercase;min-height:14px}';
+    document.head.appendChild(st);
+
+    var statusEl=document.getElementById('autoStatus');
+    var tipEl=document.getElementById('autoTip');
+    var statuses=['Loading 3D studio','Waking up Jack','Tuning the mics','Setting the stage','Getting questions ready'];
+    var tips=['Tip: Streaks give bonus points','Tip: You have 30s per question','Tip: Aim at the colored button to answer','Tip: Top 10 players win rewards','Tip: Complete all 10 to unlock your grade'];
+    var si=0,titi=0;
+    var rot=setInterval(function(){
+        si=(si+1)%statuses.length;if(statusEl)statusEl.firstChild.textContent=statuses[si];
+        titi=(titi+1)%tips.length;if(tipEl)tipEl.textContent=tips[titi];
+    },2400);
+
+    var ready=false;var startT=Date.now();var MIN=4000;
+    var chk=setInterval(function(){
+        var isReady=el('startBtn').classList.contains('ready');
+        var elapsed=Date.now()-startT;
+        if(isReady&&elapsed>=MIN&&!ready){
+            ready=true;clearInterval(chk);clearInterval(rot);
+            if(statusEl)statusEl.firstChild.textContent='Ready';
+            setTimeout(function(){
+                ld.classList.add('out');
+                setTimeout(function(){
+                    ld.remove();
+                    var s=document.getElementById('autoLoadStyle');if(s)s.remove();
+                    startGame();
+                    history.replaceState(null,'','index.html');
+                },500);
+            },400);
+        }
+    },100);
+}
+addEventListener('load',tryAutoStart);
+tryAutoStart();

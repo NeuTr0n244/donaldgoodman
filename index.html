@@ -8,6 +8,14 @@
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<script>
+// Always enter through landing — if no autostart param, redirect
+(function(){
+  if (!new URLSearchParams(location.search).has('autostart')) {
+    location.replace('landing.html');
+  }
+})();
+</script>
 
 <canvas id="scene3d"></canvas>
 
@@ -27,9 +35,12 @@
     <div class="prof-card">
         <button class="prof-close" onclick="document.getElementById('profModal').classList.remove('vis')">&times;</button>
         <h3 class="prof-title">Edit Profile</h3>
-        <div class="prof-upload" onclick="document.getElementById('profFile').click()">
+        <div class="prof-upload" onclick="(function(f){f.value='';f.click()})(document.getElementById('profFile'))">
             <div class="prof-big-avatar" id="profBigAvatar"><span id="profBigInitial">?</span></div>
-            <span class="prof-upload-label">Upload photo</span>
+            <div class="prof-upload-actions">
+                <span class="prof-upload-label">Upload photo</span>
+                <button type="button" id="profRemovePhoto" class="prof-remove-btn" style="display:none">Remove</button>
+            </div>
             <input type="file" id="profFile" accept="image/*" style="display:none">
         </div>
         <div class="prof-field"><label>Name</label><input type="text" id="profNameInput" placeholder="Your name" maxlength="20"></div>
@@ -100,7 +111,7 @@
         <button class="g-opt" data-i="2"><span class="go-num">3</span><span class="go-txt"></span></button>
         <button class="g-opt" data-i="3"><span class="go-num">4</span><span class="go-txt"></span></button>
     </div>
-    <div class="g-foot"><span>&#9889; <strong id="gStreak">0</strong></span><span>Level: <strong id="gLevel">MEDIUM</strong></span></div>
+    <div class="g-foot" style="display:none"><span>&#9889; <strong id="gStreak">0</strong></span><span>Level: <strong id="gLevel">MEDIUM</strong></span></div>
     <div class="g-bubble" id="gBubble"><p id="gBubbleText"></p></div>
     <div class="g-cross" id="gCross"><div class="gc-dot"></div><div class="gc-ring"></div></div>
     <div class="g-big-timer" id="gBigTimer"><span class="gbt-num" id="gBigNum">30</span><span class="gbt-label">ANSWER</span></div>
