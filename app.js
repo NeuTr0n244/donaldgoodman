@@ -453,7 +453,7 @@ function closePause(){
 function quitGame(){
     el('pauseMenu').classList.remove('vis');killAll();exitGame();
     // Redirect back to landing page
-    location.href='landing.html';
+    location.href='/';
 }
 
 // ============================================
@@ -666,7 +666,7 @@ function init(){
 
     // Play again - go back to landing
     el('rAgain').addEventListener('click',function(){
-        location.href='landing.html';
+        location.href='/';
     });
 }
 
@@ -745,7 +745,7 @@ function tryAutoStart(){
                     ld.remove();
                     var s=document.getElementById('autoLoadStyle');if(s)s.remove();
                     startGame();
-                    history.replaceState(null,'','index.html');
+                    history.replaceState(null,'','/game.html');
                 },500);
             },400);
         }
