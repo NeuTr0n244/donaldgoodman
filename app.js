@@ -45,7 +45,7 @@ ok:["Brilliant! Correct!","You nailed it!","Absolutely right!","Perfect!","You'r
 no:["Not quite!","That's not right!","Oh no!","Incorrect!","Not this time!","Wrong!"],
 timeout:["Time's up!","Too slow!","Let's move on!"],
 suspense:["Hmm, let me check...","Is that the answer? We shall see...","That's locked in. Moment of truth...","Final answer? Let's see...","Tension! Let's reveal...","Let me check carefully..."],
-intro:["Welcome to The Jack Morrison Show! The sharpest English speakers go head to head, and the winner walks away with Solana rewards. Are you ready?"]
+intro:["Welcome to The Morgan Show! The sharpest English speakers go head to head, and the winner walks away with Solana rewards. Are you ready?"]
 };
 
 // ============================================
@@ -687,7 +687,7 @@ function tryAutoStart(){
     var ld=document.createElement('div');
     ld.id='autoLoad';
     ld.innerHTML='<div class="al-inner">'+
-        '<div class="al-logo"><span class="al-g">JACK</span><span class="al-w">MORRISON</span></div>'+
+        '<div class="al-logo"><span class="al-g">MORGAN</span><span class="al-w">SHOW</span></div>'+
         '<div class="al-spinner"><div class="al-ring"></div><div class="al-dot"></div></div>'+
         '<div class="al-status" id="autoStatus">Loading 3D studio</div>'+
         '<div class="al-bar"><div class="al-bar-fill"></div></div>'+
@@ -724,7 +724,7 @@ function tryAutoStart(){
 
     var statusEl=document.getElementById('autoStatus');
     var tipEl=document.getElementById('autoTip');
-    var statuses=['Loading 3D studio','Waking up Jack','Tuning the mics','Setting the stage','Getting questions ready'];
+    var statuses=['Loading 3D studio','Waking up Morgan','Tuning the mics','Setting the stage','Getting questions ready'];
     var tips=['Tip: Streaks give bonus points','Tip: You have 30s per question','Tip: Aim at the colored button to answer','Tip: Top 10 players win rewards','Tip: Complete all 10 to unlock your grade'];
     var si=0,titi=0;
     var rot=setInterval(function(){
